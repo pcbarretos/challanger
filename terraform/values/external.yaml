@@ -1,0 +1,48 @@
+controller:
+  config:
+    proxy-body-size: 10m
+    use-forwarded-headers: "true"
+  ingressClass: external
+  ingressClassByName: true
+  ingressClassResource:
+    controllerValue: k8s.io/external-ingress-nginx
+    default: false
+    enabled: true
+    name: external
+  metrics:
+    enabled: true    
+  podAnnotations:
+    prometheus.io/port: "10254"
+    prometheus.io/scrape: "true"
+  replicaCount: 3
+  resources:
+    limits:
+      cpu: 150m
+      memory: 300Mi
+    requests:
+      cpu: 150m
+      memory: 300Mi
+  service:
+    annotations:
+#      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "${ARN_CA}"
+      service.beta.kubernetes.io/aws-load-balancer-name: ingress-external
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+      service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    enabled: true
+    external:
+      enabled: true
+    internal:
+      enabled: false
+    loadBalancerSourceRanges:
+    - 0.0.0.0/0  
+    targetPorts:
+      https: http
+  targetPorts:
+    https: http
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
