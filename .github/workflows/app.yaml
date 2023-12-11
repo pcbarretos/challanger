@@ -1,0 +1,106 @@
+name: Build Application
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+      - release/**
+      - feature/**
+  pull_request:
+    branches:
+      - main  
+      
+
+jobs:
+  CI_CD:
+    runs-on: ubuntu-latest
+    name: Build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: wkrzywiec/kanban-board
+          ref: master
+
+      - name: Configure AWS Credentials 2
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }} 
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Frontend, Push to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ env.REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        working-directory: ./kanban-ui
+        run: |
+          docker build -t $REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:IMAGE_TAG
+
+      - name: Build Backend, Push to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: ${{ env.REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        working-directory: ./kanban-app
+        run: |
+          docker build -t $REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:IMAGE_TAG
+  
+  Deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Helm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials 2
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+      
+      - name: Get KubeConfig
+        shell: bash
+        run: |
+          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ secrets.AWS_CLUSTER_NAME }}
+                
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 'Deploy Front'
+        uses: 'deliverybot/helm@v1'
+        with:
+          release: './frontend'
+          namespace: 'demo'
+          chart: 'frontend'
+          value-files: >-
+            [
+              "./frontend/values.yaml"
+            ]
+          token: '${{ github.token }}'
+        env:
+          KUBECONFIG_FILE: "~/.kube/config"
+      
+      - name: 'Deploy Back'
+        uses: 'deliverybot/helm@v1'
+        with:
+          release: './backend'
+          namespace: 'demo'
+          chart: 'backend'
+          value-files: >-
+            [
+              "./backend/values.yaml"
+            ]
+          token: '${{ github.token }}'
+        env:
+          KUBECONFIG_FILE: "~/.kube/config"          

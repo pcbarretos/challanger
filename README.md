@@ -77,7 +77,7 @@ Para esses casos foi adicionado um opção para remover o lock da tabela.
 ![Git Execução](./resources/lock.png)
 
 Assim que o a branch e o abiente são selecionados a pipe pode ou não pedir uma aporvação manual *(Produção)*
-- Caso a branch seja diferente de main, ouo da branch protegida, qualquer deploy em produção casionara em um erro
+- Caso a branch seja diferente de main, ou da branch protegida, qualquer deploy em produção casionara em um erro
 
 ![Git Execução](./resources/erro.png)
 
