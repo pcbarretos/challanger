@@ -55,6 +55,7 @@ jobs:
           docker push $REGISTRY/$REPOSITORY:IMAGE_TAG
   
   Deploy:
+    needs: CI_CD
     runs-on: ubuntu-latest
     name: Deploy Helm
     steps:

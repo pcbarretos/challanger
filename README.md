@@ -93,24 +93,38 @@ Caso as opções estejam Ok para *Produção* a pipeline solicitara a aprovaçã
 
 O mesmo se da para o destroy da infraestrutura para o ambiente de *dev* nao precisa de aprovadores, apenas para *`Production`*
 
+## Arquitura da Pipeline da Aplicação
+
+- A pipeline da aplicação consiste em realizar o checkout de um reppositório, e realizar o build via *Docker*
+- Realizar o upload da umagem para o registry Privado ECR
+- Realizar o deploy dos containers no cluster K8s com o uso do Helm (Local)
+
 
 ## Pré Requisitos Para Funcionamento
 - Create IAM User
   - Usuário com permissões minimas/API 
     - *NAO USAR ROOT_ACCOUNT*
+    - 
 - Adicionar Chaves de Usuário em Secrets do Github
   - `AWS_ACCESS_KEY`
   - `AWS_SECRET_KEY`
   - `AWS_REGION`
+  - `AWS_CLUSTER_NAME`
+  - `REGISTRY`
+  
 - Bucket S3
   - Bucket com Versionamento Ativado
     - Adicionar o nome do Bucket no arquino `terraform.tf linha 38`
+
 - DynamoDB Table
   - Minimas configs LockID type HASH
     - Adicionar o nome databela no arquivo `terraform.tf linha 42`
+
 - Criar duas environments no Github -> *dev*, *production*
   - Doc Git
+  
     - https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment
+  
 - Criar regra de proteção para branch principal *main*, *master* etc, e adicionar os aprovadores.
   - Doc Git
     - https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-branch-protection-rule
