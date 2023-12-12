@@ -49,13 +49,14 @@ jobs:
         working-directory: ./kanban-ui
         shell: bash
         run: |
-          output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} | grep -c RepositoryNotFoundException)
-
-          if [[ "$output" -ne 0 ]]; then            
-            aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
-          else
-            echo "Repo ${{ env.REPOSITORY }} Exist!!!"   
-          fi
+          aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug || true
+          
+          # output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} | grep -c RepositoryNotFoundException)
+          # if [[ "$output" -ne 0 ]]; then            
+          #   aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
+          # else
+          #   echo "Repo ${{ env.REPOSITORY }} Exist!!!"   
+          # fi
 
           echo "Build And Push Image"
           docker build -t ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }} .
@@ -69,13 +70,14 @@ jobs:
         working-directory: ./kanban-app
         shell: bash
         run: |
-          output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} | grep -c RepositoryNotFoundException)
-
-          if [[ "$output" -ne 0 ]]; then            
-            aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
-          else
-            echo "Repo ${{ env.REPOSITORY }} Exist!!!"
-          fi
+          aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug || true
+          
+          # output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} | grep -c RepositoryNotFoundException)
+          # if [[ "$output" -ne 0 ]]; then            
+          #   aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
+          # else
+          #   echo "Repo ${{ env.REPOSITORY }} Exist!!!"
+          # fi
 
           echo "Build And Push Image"
           docker build -t ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }} .
