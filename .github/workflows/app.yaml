@@ -108,6 +108,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Add CLI
+        shell: bash
+        run: |
+          apt install aws-cli -y
+
       - name: 'Deploy Front'
         uses: 'deliverybot/helm@v1'
         with:
@@ -125,7 +130,7 @@ jobs:
           REPOSITORY: frontend
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
-      
+                         
       - name: 'Deploy Back'
         uses: 'deliverybot/helm@v1'
         with:
