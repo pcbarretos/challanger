@@ -52,7 +52,7 @@ jobs:
 
           if [ $? -ne 0 ]; then
             if echo ${output} | grep -q RepositoryNotFoundException; then
-              aws ecr create-repository --repository-name ${{ env.REPOSITORY }}
+              aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
             else
               >&2 echo ${output}
             fi
@@ -69,11 +69,11 @@ jobs:
           IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
         working-directory: ./kanban-app
         run: |
-          output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} 2>&1)
+          output=$(aws ecr describe-repositories --region ${{ secrets.AWS_REGION }} --repository-names ${{ env.REPOSITORY }} 2>&1)
 
           if [ $? -ne 0 ]; then
             if echo ${output} | grep -q RepositoryNotFoundException; then
-              aws ecr create-repository --repository-name ${{ env.REPOSITORY }}
+              aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
             else
               >&2 echo ${output}
             fi
