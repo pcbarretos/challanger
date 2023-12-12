@@ -51,11 +51,10 @@ jobs:
         run: |
           output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} 2>&1 | grep -c RepositoryNotFoundException)
 
-          if [ $output != 0 ]; then            
+          if [[ "$output" -ne 0 ]]; then            
             aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
           else
-            echo "Repo ${{ env.REPOSITORY }} Exist!!!"
-   
+            echo "Repo ${{ env.REPOSITORY }} Exist!!!"   
           fi
 
           echo "Build And Push Image"
@@ -72,7 +71,7 @@ jobs:
         run: |
           output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} 2>&1 | grep -c RepositoryNotFoundException)
 
-          if [ $output != 0 ]; then            
+          if [[ "$output" -ne 0 ]]; then            
             aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
           else
             echo "Repo ${{ env.REPOSITORY }} Exist!!!"
