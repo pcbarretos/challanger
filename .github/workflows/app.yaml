@@ -100,12 +100,10 @@ jobs:
           echo 'EOF' >> $GITHUB_ENV
 
 
-
-
       - name: Helm Deploy
-        uses: licenseware/helm@v1
+        uses: licenseware/helm@v1.8.0
         with:
-          kubeconfig: ./kubeconfig
+          kubeconfig: ${{ env.KUBE_CONFIG_DATA }}
           action: install
           atomic: "1"
           chart-dir: ./backend
@@ -119,6 +117,7 @@ jobs:
           REPOSITORY: backend
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
+          KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
 
 
       # - name: 'Deploy Front'
