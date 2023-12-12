@@ -47,6 +47,7 @@ jobs:
           REPOSITORY: frontend
           IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
         working-directory: ./kanban-ui
+        shell: bash
         run: |
           output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} 2>&1 | grep -c RepositoryNotFoundException)
 
@@ -67,6 +68,7 @@ jobs:
           REPOSITORY: backend
           IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
         working-directory: ./kanban-app
+        shell: bash
         run: |
           output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} 2>&1 | grep -c RepositoryNotFoundException)
 
