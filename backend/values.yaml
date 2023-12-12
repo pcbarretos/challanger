@@ -23,23 +23,29 @@ env:
 
 service:
   type: ClusterIP
+  name: frontend
+  protocol: TCP
   port: 80
+  targetPort: 8080
+spec:
+  selector:
+    app.kubernetes.io/name: backend
 
 ingress:
-  enabled: true
-  annotations:
-     kubernetes.io/ingress.class: alb
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: meu-app.com.br
-      paths:
-        - path: /backend
-          pathType: Prefix
-          backend:
-            service:
-              name: backend
-              port:
-                number: 80
+  enabled: false
+#   annotations:
+#      kubernetes.io/ingress.class: alb
+#     # kubernetes.io/tls-acme: "true"
+#   hosts:
+#     - host: meu-app.com.br
+#       paths:
+#         - path: /backend
+#           pathType: Prefix
+#           backend:
+#             service:
+#               name: backend
+#               port:
+#                 number: 80
   tls: []
 
 resources:
@@ -66,4 +72,6 @@ postgres:
     name: kamban
     user: kamban
     password: kamban
+  ports:
+    internal: 5432
 

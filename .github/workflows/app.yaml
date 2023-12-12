@@ -41,18 +41,18 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Frontend, Push to ECR
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: frontend
-          IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
-        working-directory: ./kanban-ui
-        shell: bash
-        run: |
-          aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug || true
-          echo "Build And Push Image"
-          docker build -t ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }} .
-          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+      # - name: Build Frontend, Push to ECR
+      #   env:
+      #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     REPOSITORY: frontend
+      #     IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
+      #   working-directory: ./kanban-ui
+      #   shell: bash
+      #   run: |
+      #     aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug || true
+      #     echo "Build And Push Image"
+      #     docker build -t ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }} .
+      #     docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
 
       - name: Build Backend, Push to ECR
         env:
@@ -96,42 +96,57 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Add CLI
-        shell: bash
-        run: |
-          apt install awscli -y
-
-      - name: 'Deploy Front'
-        uses: deliverybot/helm@v1.5.0
+      - name: Helm Deploy
+        uses: licenseware/helm@v1
         with:
-          release: './frontend'
-          namespace: 'demo'
-          chart: 'frontend'
-          value-files: >-
-            [
-              "./frontend/values.yaml"
-            ]
-          token: '${{ github.token }}'
+          kubeconfig: ~/.kube/config
+          action: install
+          atomic: "1"
+          chart-dir: ./backend
+          create-namespace: "0"
+          namespace: demo
+          timeout: 5m
+          update-dependencies: "1"
+          cleanup-on-fail: "1"
+          values-filepath: ./backend/values.yaml
         env:
-          KUBECONFIG_FILE: "~/.kube/config"
-          REPOSITORY: frontend
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
-                         
-      - name: 'Deploy Back'
-        uses: deliverybot/helm@v1.5.0
-        with:
-          release: './backend'
-          namespace: 'demo'
-          chart: 'backend'
-          value-files: >-
-            [
-              "./backend/values.yaml"
-            ]
-          token: '${{ github.token }}'
-        env:
-          KUBECONFIG_FILE: "~/.kube/config"
           REPOSITORY: backend
-          IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
+
+
+      # - name: 'Deploy Front'
+      #     uses: deler-aziz/helm-deploy-action@v1.0.1
+      #   with:
+      #     release: './frontend'
+      #     namespace: 'demo'
+      #     chart: 'frontend'
+      #     value-files: >-
+      #       [
+      #         "./frontend/values.yaml"
+      #       ]
+      #     token: '${{ github.token }}'
+      #   env:
+      #     KUBECONFIG_FILE: "~/.kube/config"
+      #     REPOSITORY: frontend
+      #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
+                         
+      # - name: 'Deploy Back'
+      #   uses: deler-aziz/helm-deploy-action@v1.0.1
+      #   with:
+      #     release: './backend'
+      #     namespace: 'demo'
+      #     chart: 'backend'
+      #     atomic: true
+      #     value-files: >-
+      #       [
+      #         "./backend/values.yaml"
+      #       ]
+      #     token: '${{ github.token }}'
+      #   env:
+      #     KUBECONFIG_FILE: "~/.kube/config"
+      #     REPOSITORY: backend
+      #     IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
+      #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
 
