@@ -94,30 +94,44 @@ jobs:
 
       - name: kubeconfig
         run: |
-          aws eks update-kubeconfig --name ${{ env.AWS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}  --kubeconfig ./kubeconfig
+          aws eks update-kubeconfig --name ${{ env.AWS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}  --kubeconfig ./kubeconfig
           echo 'KUBE_CONFIG_DATA<<EOF' >> $GITHUB_ENV
           echo $(cat ./kubeconfig | base64) >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 
-
-      - name: Helm Deploy
-        uses: licenseware/helm@v1.8.0
-        with:
-          kubeconfig: ${{ env.KUBE_CONFIG_DATA }}
-          action: install
-          atomic: "1"
-          chart-dir: ./backend
-          create-namespace: "0"
-          namespace: demo
-          timeout: 5m
-          update-dependencies: "1"
-          cleanup-on-fail: "1"
-          values-filepath: ./backend/values.yaml
+      - name: Install & upgrade Helm chart on EKS
+        uses: open-source-srilanka/eks-helm-client-github-action@v1.0.0
         env:
+          REGION_CODE: ${{ secrets.AWS_REGION }}
+          CLUSTER_NAME: ${{ env.AWS_CLUSTER_NAME }}
           REPOSITORY: backend
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
-          KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
+        with:
+          args: >
+            bash -c "            
+              helm install backend ./backend --namespace demo -f ./backend/values.yaml --atomic 
+            "
+      
+      
+      # - name: Helm Deploy
+      #   uses: licenseware/helm@v1.8.0
+      #   with:
+      #     kubeconfig: ${{ env.KUBE_CONFIG_DATA }}
+      #     action: install
+      #     atomic: "1"
+      #     chart-dir: ./backend
+      #     create-namespace: "0"
+      #     namespace: demo
+      #     timeout: 5m
+      #     update-dependencies: "1"
+      #     cleanup-on-fail: "1"
+      #     values-filepath: ./backend/values.yaml
+      #   env:
+      #     REPOSITORY: backend
+      #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
+      #     KUBE_CONFIG_DATA: ${{ env.KUBE_CONFIG_DATA }}
 
 
       # - name: 'Deploy Front'
