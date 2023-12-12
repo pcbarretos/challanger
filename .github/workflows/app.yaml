@@ -12,7 +12,7 @@ on:
       - main  
 
 env:
-  AWS_CLUSTER_NAME: cluester-eks      
+  AWS_CLUSTER_NAME: cluster-eks      
 
 jobs:
   CI_CD:
