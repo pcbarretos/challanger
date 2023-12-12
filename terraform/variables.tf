@@ -41,3 +41,8 @@ variable "my_domain" {
   type        = string
   default     = ""
 }
+
+variable "env_name" {
+  type    = string
+  default = "dev"
+}

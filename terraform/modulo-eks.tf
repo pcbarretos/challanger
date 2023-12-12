@@ -47,18 +47,19 @@ module "eks" {
       desired_size = 2
     }
 
-    node3 = {
-      name = "eks-node-2"
+    #   node3 = {
+    #     name = "eks-node-2"
 
-      instance_types = ["t3.medium"]
+    #     instance_types = ["t3.medium"]
 
-      min_size     = 1
-      max_size     = 2
-      desired_size = 2
-    }
-  }
-  tags = {
-    managedBy = "terraform"
-    owner     = var.owner
+    #     min_size     = 1
+    #     max_size     = 2
+    #     desired_size = 2
+    #   }
+    # }
+    # tags = {
+    #   managedBy = "terraform"
+    #   owner     = var.owner
+    # }
   }
 }
