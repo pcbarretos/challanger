@@ -109,7 +109,8 @@ jobs:
           IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
         with:
           args: >
-            bash -c "            
+            bash -c "
+              helm dependencie update ./backend           
               helm install backend ./backend --namespace demo -f ./backend/values.yaml --atomic 
             "
       
