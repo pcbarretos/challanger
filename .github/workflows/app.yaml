@@ -110,7 +110,7 @@ jobs:
         with:
           args: >
             bash -c "
-              helm dependencie update ./backend           
+              helm dependency update ./backend           
               helm install backend ./backend --namespace demo -f ./backend/values.yaml --atomic 
             "
       
