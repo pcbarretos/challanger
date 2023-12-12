@@ -53,7 +53,7 @@ jobs:
           if [ $output -ne 0 ]; then            
             aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
           else
-            echo Repo ${{ env.REPOSITORY }} Exist!!!
+            echo "Repo ${{ env.REPOSITORY }} Exist!!!"
             continue       
           fi
 
@@ -73,7 +73,7 @@ jobs:
           if [ $output -ne 0 ]; then            
             aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
           else
-            echo Repo ${{ env.REPOSITORY }} Exist!!!
+            echo "Repo ${{ env.REPOSITORY }} Exist!!!"
             continue
           fi
 
