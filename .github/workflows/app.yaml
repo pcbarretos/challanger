@@ -92,31 +92,33 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Helm Deploy
-        shell: bash
+      - name: kubeconfig
         run: |
-          apt install helm -y
+          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}  --kubeconfig ./kubeconfig
+          echo 'KUBE_CONFIG_DATA<<EOF' >> $GITHUB_ENV
+          echo $(cat ./kubeconfig | base64) >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
 
 
 
-          
-      # - name: Helm Deploy
-      #   uses: licenseware/helm@v1
-      #   with:
-      #     kubeconfig: ${{ secrets.KUBECONFIG }}
-      #     action: install
-      #     atomic: "1"
-      #     chart-dir: ./backend
-      #     create-namespace: "0"
-      #     namespace: demo
-      #     timeout: 5m
-      #     update-dependencies: "1"
-      #     cleanup-on-fail: "1"
-      #     values-filepath: ./backend/values.yaml
-      #   env:
-      #     REPOSITORY: backend
-      #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      #     IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
+
+      - name: Helm Deploy
+        uses: licenseware/helm@v1
+        with:
+          kubeconfig: ./kubeconfig
+          action: install
+          atomic: "1"
+          chart-dir: ./backend
+          create-namespace: "0"
+          namespace: demo
+          timeout: 5m
+          update-dependencies: "1"
+          cleanup-on-fail: "1"
+          values-filepath: ./backend/values.yaml
+        env:
+          REPOSITORY: backend
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
 
 
       # - name: 'Deploy Front'
