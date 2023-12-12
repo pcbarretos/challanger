@@ -90,7 +90,7 @@ jobs:
       - name: Get KubeConfig
         shell: bash
         run: |
-          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ env.AWS_CLUSTER_NAME }}
+          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ env.AWS_CLUSTER_NAME }} --kubeconfig ~/.kube/config
                 
       - name: Login to Amazon ECR
         id: login-ecr
