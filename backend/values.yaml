@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: "${REGISTRY}"
+  repository: "${REPOSITORY}"
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart version.
-  tag: "${{ github.sha }}"
+  tag: "${IMAGE_TAG}"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -43,12 +43,12 @@ service:
 ingress:
   enabled: true
   annotations:
-     kubernetes.io/ingress.class: external
+     kubernetes.io/ingress.class: alb
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: backend-app.com.br
+    - host: meu-app.com.br
       paths:
-        - path: /
+        - path: /backend
           pathType: Prefix
           backend:
             service:

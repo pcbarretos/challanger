@@ -10,7 +10,9 @@ on:
   pull_request:
     branches:
       - main  
-      
+
+env:
+  AWS_CLUSTER_NAME: cluester-eks      
 
 jobs:
   CI_CD:
@@ -22,6 +24,11 @@ jobs:
         with:
           repository: wkrzywiec/kanban-board
           ref: master
+
+      - uses: benjlevesque/short-sha@v2.2
+        id: short-sha
+        with:
+          length: 6
 
       - name: Configure AWS Credentials 2
         uses: aws-actions/configure-aws-credentials@v4
@@ -37,21 +44,43 @@ jobs:
       - name: Build Frontend, Push to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: ${{ env.REPOSITORY }}
-          IMAGE_TAG: ${{ github.sha }}
+          REPOSITORY: frontend
+          IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
         working-directory: ./kanban-ui
         run: |
-          docker build -t $REPOSITORY:$IMAGE_TAG .
+          output=$(aws ecr describe-repositories --repository-names ${REPOSITORY} 2>&1)
+
+          if [ $? -ne 0 ]; then
+            if echo ${output} | grep -q RepositoryNotFoundException; then
+              aws ecr create-repository --repository-name ${REPO_NAME}
+            else
+              >&2 echo ${output}
+            fi
+          fi
+
+          echo "Push Image"
+          docker build -t $REGISTRY/REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:IMAGE_TAG
 
       - name: Build Backend, Push to ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: ${{ env.REPOSITORY }}
-          IMAGE_TAG: ${{ github.sha }}
+          REPOSITORY: backend
+          IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
         working-directory: ./kanban-app
         run: |
-          docker build -t $REPOSITORY:$IMAGE_TAG .
+          output=$(aws ecr describe-repositories --repository-names ${REPOSITORY} 2>&1)
+
+          if [ $? -ne 0 ]; then
+            if echo ${output} | grep -q RepositoryNotFoundException; then
+              aws ecr create-repository --repository-name ${REPO_NAME}
+            else
+              >&2 echo ${output}
+            fi
+          fi
+
+          echo "Push Image"
+          docker build -t $REGISTRY/REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:IMAGE_TAG
   
   Deploy:
@@ -61,6 +90,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - uses: benjlevesque/short-sha@v2.2
+        id: short-sha
+        with:
+          length: 6        
 
       - name: Configure AWS Credentials 2
         uses: aws-actions/configure-aws-credentials@v4
@@ -72,7 +106,7 @@ jobs:
       - name: Get KubeConfig
         shell: bash
         run: |
-          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ secrets.AWS_CLUSTER_NAME }}
+          aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ env.AWS_CLUSTER_NAME }}
                 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -84,6 +118,7 @@ jobs:
           release: './frontend'
           namespace: 'demo'
           chart: 'frontend'
+          atomic: true
           value-files: >-
             [
               "./frontend/values.yaml"
@@ -91,6 +126,8 @@ jobs:
           token: '${{ github.token }}'
         env:
           KUBECONFIG_FILE: "~/.kube/config"
+          REPOSITORY: frontend
+          IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
       
       - name: 'Deploy Back'
         uses: 'deliverybot/helm@v1'
@@ -98,10 +135,14 @@ jobs:
           release: './backend'
           namespace: 'demo'
           chart: 'backend'
+          atomic: true
           value-files: >-
             [
               "./backend/values.yaml"
             ]
           token: '${{ github.token }}'
         env:
-          KUBECONFIG_FILE: "~/.kube/config"          
+          KUBECONFIG_FILE: "~/.kube/config"
+          REPOSITORY: backend
+          IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
+

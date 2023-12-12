@@ -60,8 +60,8 @@ Configurações de entrada:
         type: choice
         default: " "
         options:
-          - -lock=false
           - " "
+          - -lock=false
           - -lock=true
 ```
 
