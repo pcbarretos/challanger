@@ -111,7 +111,7 @@ jobs:
           args: >
             bash -c "
               helm dependency update ./backend           
-              helm install backend ./backend --namespace demo -f ./backend/values.yaml --atomic 
+              helm upgrade --install backend ./backend --namespace demo -f ./backend/values.yaml --atomic 
             "
       
       
