@@ -93,22 +93,30 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Helm Deploy
-        uses: licenseware/helm@v1
-        with:
-          kubeconfig: ${{ secrets.KUBECONFIG }}
-          action: install
-          atomic: "1"
-          chart-dir: ./backend
-          create-namespace: "0"
-          namespace: demo
-          timeout: 5m
-          update-dependencies: "1"
-          cleanup-on-fail: "1"
-          values-filepath: ./backend/values.yaml
-        env:
-          REPOSITORY: backend
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
+        shell: bash
+        run: |
+          apt install helm -y
+
+
+
+          
+      # - name: Helm Deploy
+      #   uses: licenseware/helm@v1
+      #   with:
+      #     kubeconfig: ${{ secrets.KUBECONFIG }}
+      #     action: install
+      #     atomic: "1"
+      #     chart-dir: ./backend
+      #     create-namespace: "0"
+      #     namespace: demo
+      #     timeout: 5m
+      #     update-dependencies: "1"
+      #     cleanup-on-fail: "1"
+      #     values-filepath: ./backend/values.yaml
+      #   env:
+      #     REPOSITORY: backend
+      #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
 
 
       # - name: 'Deploy Front'
