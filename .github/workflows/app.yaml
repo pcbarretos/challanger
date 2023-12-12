@@ -48,19 +48,19 @@ jobs:
           IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
         working-directory: ./kanban-ui
         run: |
-          output=$(aws ecr describe-repositories --repository-names ${REPOSITORY} 2>&1)
+          output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} 2>&1)
 
           if [ $? -ne 0 ]; then
             if echo ${output} | grep -q RepositoryNotFoundException; then
-              aws ecr create-repository --repository-name ${REPO_NAME}
+              aws ecr create-repository --repository-name ${{ env.REPOSITORY }}
             else
               >&2 echo ${output}
             fi
           fi
 
           echo "Push Image"
-          docker build -t $REGISTRY/REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:IMAGE_TAG
+          docker build -t ${{ env.REPOSITORY }}Y/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }} .
+          docker push ${{ env.REPOSITORY }}Y/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
 
       - name: Build Backend, Push to ECR
         env:
@@ -69,19 +69,19 @@ jobs:
           IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
         working-directory: ./kanban-app
         run: |
-          output=$(aws ecr describe-repositories --repository-names ${REPOSITORY} 2>&1)
+          output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} 2>&1)
 
           if [ $? -ne 0 ]; then
             if echo ${output} | grep -q RepositoryNotFoundException; then
-              aws ecr create-repository --repository-name ${REPO_NAME}
+              aws ecr create-repository --repository-name ${{ env.REPOSITORY }}
             else
               >&2 echo ${output}
             fi
           fi
 
           echo "Push Image"
-          docker build -t $REGISTRY/REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:IMAGE_TAG
+          docker build -t ${{ env.REPOSITORY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }} .
+          docker push ${{ env.REPOSITORY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
   
   Deploy:
     needs: CI_CD
@@ -127,6 +127,7 @@ jobs:
         env:
           KUBECONFIG_FILE: "~/.kube/config"
           REPOSITORY: frontend
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
       
       - name: 'Deploy Back'
@@ -145,4 +146,5 @@ jobs:
           KUBECONFIG_FILE: "~/.kube/config"
           REPOSITORY: backend
           IMAGE_TAG: ${{ steps.short-sha.outputs.sha }}
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
 
