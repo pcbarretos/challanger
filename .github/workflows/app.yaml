@@ -49,7 +49,7 @@ jobs:
         working-directory: ./kanban-ui
         shell: bash
         run: |
-          output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} 2>&1 | grep -c RepositoryNotFoundException)
+          output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} | grep -c RepositoryNotFoundException)
 
           if [[ "$output" -ne 0 ]]; then            
             aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
@@ -69,7 +69,7 @@ jobs:
         working-directory: ./kanban-app
         shell: bash
         run: |
-          output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} 2>&1 | grep -c RepositoryNotFoundException)
+          output=$(aws ecr describe-repositories --repository-names ${{ env.REPOSITORY }} | grep -c RepositoryNotFoundException)
 
           if [[ "$output" -ne 0 ]]; then            
             aws ecr create-repository --region ${{ secrets.AWS_REGION }} --repository-name ${{ env.REPOSITORY }} --debug
