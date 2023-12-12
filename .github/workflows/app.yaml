@@ -59,8 +59,8 @@ jobs:
           fi
 
           echo "Push Image"
-          docker build -t ${{ env.REPOSITORY }}Y/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }} .
-          docker push ${{ env.REPOSITORY }}Y/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker build -t ${{ env.REPOSITORY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }} .
+          docker push ${{ env.REPOSITORY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
 
       - name: Build Backend, Push to ECR
         env:
