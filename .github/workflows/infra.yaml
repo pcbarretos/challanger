@@ -16,9 +16,8 @@ on:
       lockState:
         description: 'Lock State' # ou outras opções de CLI
         type: choice
-        default: " "
-        options:
-          - " "
+        default:
+        options:          
           - -lock=false
           - -lock=true
   push:
@@ -40,7 +39,7 @@ env:
 jobs:
   Terraform_Apply_Infra:
     runs-on: ubuntu-latest
-    name: Terraform Workflow
+    name: Terraform Aplly
     environment: ${{ github.event.inputs.environment }}  
     if: | 
       github.event.inputs.action == 'Apply' &&
@@ -89,7 +88,7 @@ jobs:
 
 
   Terraform_Destroy:
-    name: "Terraform_Destroy"
+    name: "Terraform Destroy"
     environment: ${{ github.event.inputs.environment }}
     if: |
       github.event.inputs.action == 'Destroy' &&
