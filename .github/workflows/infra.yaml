@@ -16,8 +16,9 @@ on:
       lockState:
         description: 'Lock State' # ou outras opções de CLI
         type: choice
-        default:
-        options:          
+        default: ""
+        options:
+          - " "      
           - -lock=false
           - -lock=true
   push:
