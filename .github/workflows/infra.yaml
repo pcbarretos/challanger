@@ -1,7 +1,7 @@
 name: Create Infra Cloud
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:    
     inputs: 
       action:
         description: 'Terraform Implements Infra'
@@ -21,6 +21,17 @@ on:
           - " "
           - -lock=false
           - -lock=true
+  push:
+    branches:
+      - dev
+      - feature*
+    paths:
+      - terraform/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - terraform/**    
 
 env:
   TF_LOG: INFO
